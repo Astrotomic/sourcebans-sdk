@@ -3,7 +3,6 @@
 dataset('baseurls', [
     // default
     'https://firepoweredgaming.com/sourcebanspp/index.php',
-    'https://neonheights.xyz/bans/index.php',
     'https://bans.harpoongaming.com/index.php',
     'https://bans.panda-community.com/index.php',
     'https://sourcebans.gamerzhost.de/sb419/index.php',
@@ -13,11 +12,9 @@ dataset('baseurls', [
     'https://csgoskin.ir/server/index.php',
     'https://tf2-casual-fun.de/sourcebans/index.php',
     'https://vimo.lt/bans/index.php',
-    'http://95.216.143.68/index.php',
     'https://bans.blackwonder.tf/index.php',
     'https://sourcebans.pelikriisi.net/index.php',
     'https://hellbreak.pl/sb/index.php',
-    'http://162.55.184.155/index.php',
     'https://sourcebans.ghostcap.com/index.php',
     'https://pong.setti.info/sourcebans/index.php',
     // fluent
@@ -31,4 +28,6 @@ dataset('baseurls', [
     'https://goodteemo.serverscstrike.com/index.php',
     'https://bans.gaming-biatch.eu/index.php',
     'https://newlandscsgo.com.br/sourcebans/index.php',
+    // blue
+    'https://neonheights.xyz/bans/index.php',
 ]);

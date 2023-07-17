@@ -18,6 +18,7 @@ class DefaultExtractor extends Extractor
 
         return collect($css)->contains(
             fn (string $href) => str_starts_with(trim($href, '/'), 'themes/default/css')
+                || str_starts_with(trim($href, '/'), 'themes/gcg/css')
         );
     }
 
