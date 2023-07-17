@@ -28,9 +28,9 @@ class SourceBansConnector extends SaloonConnector
 
     public function queryBans(
         int $page = 1,
-        ?SteamID $steamid = null,
-        ?DateTimeInterface $date = null,
-        ?int $perPage = null
+        SteamID $steamid = null,
+        DateTimeInterface $date = null,
+        int $perPage = null
     ): ?LengthAwarePaginator {
         return $this->send(
             new QueryBansRequest(

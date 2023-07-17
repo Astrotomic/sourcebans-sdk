@@ -8,7 +8,7 @@ use Throwable;
 
 class BadResponseException extends SaloonRequestException
 {
-    final public function __construct(SaloonResponse $response, string $message = '', int $code = 0, ?Throwable $previous = null)
+    final public function __construct(SaloonResponse $response, string $message = '', int $code = 0, Throwable $previous = null)
     {
         parent::__construct($response, $message, $code, $previous);
     }

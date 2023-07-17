@@ -58,7 +58,6 @@ abstract class Extractor
     }
 
     /**
-     * @param  string  $value
      * @return array{start: int, end: int, total: int}
      */
     protected function paginationFromString(string $value): array
