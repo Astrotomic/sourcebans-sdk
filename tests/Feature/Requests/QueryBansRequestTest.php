@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert;
 it('can load first page of bans', function (string $baseUrl): void {
     $bans = $this->sourcebans($baseUrl)->queryBans(page: 1);
 
-    Assert::assertGreaterThanOrEqual(0, $bans->count());
+    Assert::assertGreaterThan(0, $bans->count());
     Assert::assertLessThanOrEqual($bans->perPage(), $bans->count());
     Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
 })->with('baseurls');
@@ -34,10 +34,10 @@ it('can load specific page of bans', function (string $baseUrl, int $page): void
 it('can load all bans', function (string $baseUrl): void {
     $bans = $this->sourcebans($baseUrl)->queryBans();
 
-    Assert::assertGreaterThanOrEqual(0, $bans->count());
+    Assert::assertGreaterThan(0, $bans->count());
     Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
 })->with([
-    'http://freiheit-servers.ru/bans/index.php', // default
+    'https://swedisholdtimers.net/sourcebans/index.php', // default
     'https://www.weallplay.eu/sourcebans/index.php', // fluent
 ]);
 

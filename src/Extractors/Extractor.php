@@ -28,7 +28,7 @@ abstract class Extractor
             'd.m.Y H:i',
             'd.m.y H:i:s',
             'l dS \o\f F Y h:i:s A',
-            'd-m-Y | H:i:s',
+            'd-m-Y \| H:i:s',
         ])
             ->map(fn (string $format) => rescue(fn () => CarbonImmutable::createFromFormat($format, $value), report: false))
             ->filter()
