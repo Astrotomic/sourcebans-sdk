@@ -82,4 +82,13 @@ abstract class Extractor
             'total' => (int) $matches[3],
         ];
     }
+
+    protected function currentPageFromSelect(Crawler $select): int
+    {
+        return rescue(
+            callback: fn () => $select->filter('option[selected]')->attr('value'),
+            report: false,
+            rescue: 1,
+        );
+    }
 }

@@ -2,43 +2,67 @@
 
 namespace Astrotomic\SourceBansSdk;
 
+use Astrotomic\SourceBansSdk\Paginator\FirstResponsePagedPaginator;
 use Astrotomic\SourceBansSdk\Requests\QueryBansRequest;
-use Astrotomic\SourceBansSdk\Responses\SourceBansResponse;
 use DateTimeInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Sammyjo20\Saloon\Http\SaloonConnector;
-use Sammyjo20\Saloon\Traits\Plugins\AlwaysThrowsOnErrors;
+use Illuminate\Support\LazyCollection;
+use Saloon\Contracts\HasPagination;
+use Saloon\Contracts\Request;
+use Saloon\Contracts\Response;
+use Saloon\Http\Connector;
+use Saloon\Http\Paginators\PagedPaginator;
+use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
 use SteamID;
 
-class SourceBansConnector extends SaloonConnector
+class SourceBansConnector extends Connector implements HasPagination
 {
-    use AlwaysThrowsOnErrors;
-
-    protected ?string $response = SourceBansResponse::class;
+    use AlwaysThrowOnErrors;
 
     public function __construct(
         public readonly string $baseUrl,
     ) {
     }
 
-    public function defineBaseUrl(): string
+    public function resolveBaseUrl(): string
     {
         return $this->baseUrl;
     }
 
     public function queryBans(
-        int $page = 1,
         SteamID $steamid = null,
         DateTimeInterface $date = null,
-        int $perPage = null
-    ): ?LengthAwarePaginator {
-        return $this->send(
-            new QueryBansRequest(
-                page: $page,
-                steamid: $steamid,
-                date: $date,
-                perPage: $perPage
-            )
-        )->dto();
+        int $page = null,
+    ): LengthAwarePaginator|LazyCollection|null {
+        $request = new QueryBansRequest(
+            steamid: $steamid,
+            date: $date,
+        );
+
+        if (! is_null($page)) {
+            $request->query()->add('page', $page);
+
+            return $this->send($request)->dto();
+        }
+
+        return $this->paginate($request)
+            ->collect()
+            ->map(fn (Response $response) => $response->dto()->items())
+            ->collapse();
+    }
+
+    public function paginate(Request $request, ...$additionalArguments): PagedPaginator
+    {
+        $paginator = new FirstResponsePagedPaginator(
+            connector: $this,
+            originalRequest: $request,
+            limitCallback: fn (Response $response) => $response->dtoOrFail()->perPage(),
+            totalCallback: fn (Response $response) => $response->dtoOrFail()->total(),
+        );
+
+        $paginator->setLimitKeyName('_limit');
+        $paginator->setPageKeyName('page');
+
+        return $paginator;
     }
 }

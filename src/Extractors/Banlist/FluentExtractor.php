@@ -65,6 +65,7 @@ class FluentExtractor extends Extractor
                 ->values(),
             total: $pagination['total'],
             perPage: $pagination['end'] - $pagination['start'],
+            currentPage: $this->currentPageFromSelect($crawler->filter('#banlist table + #banlist-nav select')),
         );
     }
 }

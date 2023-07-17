@@ -7,30 +7,33 @@ use DateTimeInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use OutOfBoundsException;
-use Sammyjo20\Saloon\Http\SaloonRequest;
-use Sammyjo20\Saloon\Http\SaloonResponse;
-use Sammyjo20\Saloon\Traits\Plugins\CastsToDto;
+use Saloon\Contracts\Response;
+use Saloon\Enums\Method;
+use Saloon\Http\Request;
+use Saloon\Traits\Request\CastDtoFromResponse;
 use SteamID;
 
-class QueryBansRequest extends SaloonRequest
+class QueryBansRequest extends Request
 {
-    use CastsToDto;
+    use CastDtoFromResponse;
 
-    protected ?string $method = 'GET';
+    protected Method $method = Method::GET;
 
     public function __construct(
-        public readonly int $page = 1,
         public readonly ?SteamID $steamid = null,
         public readonly ?DateTimeInterface $date = null,
-        public readonly ?int $perPage = null,
     ) {
+    }
+
+    public function resolveEndpoint(): string
+    {
+        return '';
     }
 
     public function defaultQuery(): array
     {
         return array_merge([
             'p' => 'banlist',
-            'page' => $this->page,
         ], $this->filter());
     }
 
@@ -46,7 +49,7 @@ class QueryBansRequest extends SaloonRequest
         };
     }
 
-    protected function castToDto(SaloonResponse $response): ?LengthAwarePaginator
+    public function createDtoFromResponse(Response $response): ?LengthAwarePaginator
     {
         $crawler = $response->dom();
 
@@ -55,24 +58,12 @@ class QueryBansRequest extends SaloonRequest
             ->first(fn (Extractor $extractor) => $extractor->canHandle($crawler));
 
         if ($extractor === null) {
-            throw new OutOfBoundsException("[{$response->getOriginalRequest()->getFullRequestUrl()}] is not supported by any extractor.");
+            throw new OutOfBoundsException("[{$response->getPendingRequest()->getUrl()}] is not supported by any extractor.");
         }
 
-        $paginator = $extractor->handle($crawler);
+        return $extractor->handle($crawler)
+            ?->setPath($response->getPendingRequest()->getUrl())
+            ?->appends($response->getPendingRequest()->query()->all());
 
-        if ($paginator === null) {
-            return null;
-        }
-
-        return new LengthAwarePaginator(
-            items: $paginator->items(),
-            total: $paginator->total(),
-            perPage: max($paginator->perPage(), $this->perPage),
-            currentPage: $this->page,
-            options: [
-                'path' => $response->getOriginalRequest()->getFullRequestUrl(),
-                'query' => $response->getOriginalRequest()->getQuery(),
-            ]
-        );
     }
 }
