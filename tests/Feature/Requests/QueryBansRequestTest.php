@@ -38,8 +38,7 @@ it('can load all bans', function (string $baseUrl): void {
     Assert::assertGreaterThan(0, $bans->count());
     Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
 })->with([
-    'https://swedisholdtimers.net/sourcebans/index.php', // default
-    'https://www.weallplay.eu/sourcebans/index.php', // fluent
+    'https://sourcebans.onetap.pl/index.php', // fluent
 ]);
 
 it('can search for steamid', function (): void {
@@ -61,7 +60,7 @@ it('can search for date', function (): void {
     $date = CarbonImmutable::create(2022, 11, 16);
 
     $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebans/index.php')->queryBans(date: $date);
-    ray($bans->collect())->purple();
+
     Assert::assertInstanceOf(LazyCollection::class, $bans);
     Assert::assertSame(3, $bans->count());
     Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);

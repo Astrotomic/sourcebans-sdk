@@ -23,13 +23,6 @@ class FirstResponsePagedPaginator extends PagedPaginator
         $this->limit = null;
     }
 
-    protected function applyPagination(Request $request): Request
-    {
-        $request->query()->add('page', $this->getCurrentPage());
-
-        return $request;
-    }
-
     protected function getPageItems(Response $response, Request $request): array
     {
         return $response->dto()->items();
