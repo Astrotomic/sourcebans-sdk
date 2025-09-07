@@ -10,20 +10,20 @@ use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler;
 
-class FluentExtractor extends Extractor
+class MaterialExtractor extends Extractor
 {
     public function canHandle(Crawler $crawler): bool
     {
         $css = $crawler->filter('head link[rel=stylesheet]')->each(fn (Crawler $link) => $link->attr('href'));
 
         return collect($css)->contains(
-            fn (string $href) => str_starts_with(trim($href, '/'), 'themes/sourcebans-web-theme-fluent/style')
+            fn (string $href) => str_starts_with(trim($href, '/'), 'themes/star/css/materialdesign/css')
         );
     }
 
     public function handle(Crawler $crawler): ?LengthAwarePaginator
     {
-        $tables = $crawler->filter('#mainwrapper table tbody tr.table_hide div.collapse_content ul.ban_list_detal');
+        $tables = $crawler->filter('#banlist table.table tr[data-toggle=collapse] + tr div.collapse table.table');
 
         if ($tables->count() === 0) {
             return null;
@@ -32,8 +32,12 @@ class FluentExtractor extends Extractor
         $bans = $tables->each(function (Crawler $table): ?Ban {
             $data = new Fluent;
 
-            $table->filter('li')->each(function (Crawler $row) use ($data): void {
-                $cells = $row->filter('span');
+            $table->filter('tr')->each(function (Crawler $row) use ($data): void {
+                $cells = $row->filter('td');
+
+                if ($cells->count() !== 2) {
+                    return;
+                }
 
                 $key = Str::slug($cells->eq(0)->innerText(), '_');
                 $value = rescue(fn () => $cells->eq(1)->innerText(), report: false);
@@ -51,11 +55,11 @@ class FluentExtractor extends Extractor
                     unban_reason: $data->unban_reason ?: null,
                     total_bans: (int) $data->total_bans,
                 ),
-                report: false
+                // report: false
             );
         });
 
-        $pagination = $this->paginationFromElements($crawler->filter('#banlist-nav, .pagination > span'));
+        $pagination = $this->paginationFromElements($crawler->filter('#banlist-nav'));
 
         return new LengthAwarePaginator(
             items: collect($bans)

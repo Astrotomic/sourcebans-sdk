@@ -3,27 +3,27 @@
 namespace Astrotomic\SourceBansSdk\Requests;
 
 use Astrotomic\SourceBansSdk\Extractors\Extractor;
+use Astrotomic\SteamSdk\SteamID;
 use DateTimeInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use OutOfBoundsException;
-use Saloon\Contracts\Response;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
-use Saloon\Traits\Request\CastDtoFromResponse;
-use SteamID;
+use Saloon\Http\Response;
+use Saloon\PaginationPlugin\Contracts\Paginatable;
+use Saloon\Traits\Request\CreatesDtoFromResponse;
 
-class QueryBansRequest extends Request
+class QueryBansRequest extends Request implements Paginatable
 {
-    use CastDtoFromResponse;
+    use CreatesDtoFromResponse;
 
     protected Method $method = Method::GET;
 
     public function __construct(
         public readonly ?SteamID $steamid = null,
         public readonly ?DateTimeInterface $date = null,
-    ) {
-    }
+    ) {}
 
     public function resolveEndpoint(): string
     {
@@ -53,7 +53,7 @@ class QueryBansRequest extends Request
     {
         $crawler = $response->dom();
 
-        /** @var \Astrotomic\SourceBansSdk\Extractors\Extractor $extractor */
+        /** @var Extractor $extractor */
         $extractor = collect(app()->tagged('extractors.banlist'))
             ->first(fn (Extractor $extractor) => $extractor->canHandle($crawler));
 

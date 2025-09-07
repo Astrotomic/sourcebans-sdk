@@ -4,10 +4,10 @@ namespace Astrotomic\SourceBansSdk\Extractors\Banlist;
 
 use Astrotomic\SourceBansSdk\Data\Ban;
 use Astrotomic\SourceBansSdk\Extractors\Extractor;
+use Astrotomic\SteamSdk\SteamID;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
-use SteamID;
 use Symfony\Component\DomCrawler\Crawler;
 
 class BlueExtractor extends Extractor
@@ -30,7 +30,7 @@ class BlueExtractor extends Extractor
         }
 
         $bans = $tables->each(function (Crawler $table): ?Ban {
-            $data = new Fluent();
+            $data = new Fluent;
 
             $table->filter('tr')->each(function (Crawler $row) use ($data): void {
                 $cells = $row->filter('td.listtable_1');
@@ -59,9 +59,7 @@ class BlueExtractor extends Extractor
             );
         });
 
-        $pagination = $this->paginationFromString(
-            $crawler->filter('#banlist-nav')->innerText()
-        );
+        $pagination = $this->paginationFromElements($crawler->filter('#banlist-nav'));
 
         return new LengthAwarePaginator(
             items: collect($bans)

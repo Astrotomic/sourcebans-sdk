@@ -3,10 +3,10 @@
 namespace Astrotomic\SourceBansSdk\Data;
 
 use Astrotomic\SourceBansSdk\Enums\BanStatus;
+use Astrotomic\SteamSdk\SteamID;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
 use Spatie\LaravelData\Data;
-use SteamID;
 
 final class Ban extends Data
 {
@@ -18,8 +18,7 @@ final class Ban extends Data
         public readonly ?string $ban_reason,
         public readonly ?string $unban_reason,
         public readonly int $total_bans,
-    ) {
-    }
+    ) {}
 
     public function status(): BanStatus
     {

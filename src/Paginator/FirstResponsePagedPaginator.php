@@ -2,11 +2,10 @@
 
 namespace Astrotomic\SourceBansSdk\Paginator;
 
-use Closure;
-use Saloon\Contracts\Connector;
-use Saloon\Contracts\Request;
-use Saloon\Exceptions\PaginatorException;
-use Saloon\Http\Paginators\PagedPaginator;
+use Saloon\Http\Connector;
+use Saloon\Http\Request;
+use Saloon\Http\Response;
+use Saloon\PaginationPlugin\PagedPaginator;
 
 class FirstResponsePagedPaginator extends PagedPaginator
 {
@@ -15,23 +14,25 @@ class FirstResponsePagedPaginator extends PagedPaginator
     public function __construct(
         Connector $connector,
         Request $originalRequest,
-        protected Closure $limitCallback,
-        protected Closure $totalCallback,
-        int $page = 1
     ) {
         parent::__construct(
             connector: $connector,
-            originalRequest: $originalRequest,
-            perPage: PHP_INT_MAX,
-            page: $page
+            request: $originalRequest,
         );
 
         $this->limit = null;
     }
 
-    protected function applyPagination(Request $request): void
+    protected function applyPagination(Request $request): Request
     {
-        $request->query()->add($this->getPageKeyName(), $this->getCurrentPage());
+        $request->query()->add('page', $this->getCurrentPage());
+
+        return $request;
+    }
+
+    protected function getPageItems(Response $response, Request $request): array
+    {
+        return $response->dto()->items();
     }
 
     public function limit(): int
@@ -41,7 +42,7 @@ class FirstResponsePagedPaginator extends PagedPaginator
         }
 
         if (is_null($this->limit)) {
-            $this->limit = call_user_func($this->limitCallback, $this->currentResponse);
+            $this->limit = $this->currentResponse->dto()->perPage();
 
             if (is_null($this->limit)) {
                 throw new PaginatorException('Unable to calculate the limit from the response. Make sure the limit callback is correct.');
@@ -58,7 +59,7 @@ class FirstResponsePagedPaginator extends PagedPaginator
         }
 
         if (is_null($this->total)) {
-            $this->total = call_user_func($this->totalCallback, $this->currentResponse);
+            $this->total = $this->currentResponse->dto()->total();
 
             if (is_null($this->total)) {
                 throw new PaginatorException('Unable to calculate the total results from the response. Make sure the callback key is correct.');
@@ -73,7 +74,7 @@ class FirstResponsePagedPaginator extends PagedPaginator
         return (int) ceil($this->totalResults() / $this->limit());
     }
 
-    protected function isFinished(): bool
+    protected function isLastPage(Response $response): bool
     {
         return $this->getCurrentPage() > $this->totalPages();
     }

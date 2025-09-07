@@ -5,6 +5,7 @@ namespace Astrotomic\SourceBansSdk;
 use Astrotomic\SourceBansSdk\Extractors\Banlist\BlueExtractor;
 use Astrotomic\SourceBansSdk\Extractors\Banlist\DefaultExtractor;
 use Astrotomic\SourceBansSdk\Extractors\Banlist\FluentExtractor;
+use Astrotomic\SourceBansSdk\Extractors\Banlist\MaterialExtractor;
 use Illuminate\Support\ServiceProvider;
 
 class SourceBansSdkServiceProvider extends ServiceProvider
@@ -14,11 +15,13 @@ class SourceBansSdkServiceProvider extends ServiceProvider
         $this->app->bind(DefaultExtractor::class);
         $this->app->bind(FluentExtractor::class);
         $this->app->bind(BlueExtractor::class);
+        $this->app->bind(MaterialExtractor::class);
 
         $this->app->tag([
             DefaultExtractor::class,
             FluentExtractor::class,
             BlueExtractor::class,
+            MaterialExtractor::class,
         ], 'extractors.banlist');
     }
 }

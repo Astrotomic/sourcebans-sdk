@@ -4,10 +4,10 @@ namespace Astrotomic\SourceBansSdk\Extractors\Banlist;
 
 use Astrotomic\SourceBansSdk\Data\Ban;
 use Astrotomic\SourceBansSdk\Extractors\Extractor;
+use Astrotomic\SteamSdk\SteamID;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
-use SteamID;
 use Symfony\Component\DomCrawler\Crawler;
 
 class DefaultExtractor extends Extractor
@@ -18,6 +18,7 @@ class DefaultExtractor extends Extractor
 
         return collect($css)->contains(
             fn (string $href) => str_starts_with(trim($href, '/'), 'themes/default/css')
+                || str_starts_with(trim($href, '/'), 'themes/sourcebans_dark/css')
                 || str_starts_with(trim($href, '/'), 'themes/gcg/css')
         );
     }
@@ -31,7 +32,7 @@ class DefaultExtractor extends Extractor
         }
 
         $bans = $tables->each(function (Crawler $table): ?Ban {
-            $data = new Fluent();
+            $data = new Fluent;
 
             $table->filter('tr:not(:first-child)')->each(function (Crawler $row) use ($data): void {
                 $cells = $row->filter('td');
@@ -44,9 +45,12 @@ class DefaultExtractor extends Extractor
 
             return rescue(
                 callback: fn () => new Ban(
-                    steam_id: new SteamID($data->steam_id),
+                    steam_id: collect(['steam_id', 'steam2', 'steam_community'])
+                        ->map(fn (string $key) => rescue(fn () => new SteamID($data[$key]), report: false))
+                        ->filter()
+                        ->first(),
                     invoked_on: $this->toCarbonImmutable($data->invoked_on),
-                    ban_length: $this->toCarbonInterval($data->banlength),
+                    ban_length: $this->toCarbonInterval($data->ban_length ?? $data->banlength),
                     expires_on: $this->toCarbonImmutable($data->expires_on),
                     ban_reason: $data->reason ?: null,
                     unban_reason: $data->unban_reason ?: null,
@@ -56,9 +60,7 @@ class DefaultExtractor extends Extractor
             );
         });
 
-        $pagination = $this->paginationFromString(
-            $crawler->filter('#banlist table + #banlist-nav')->innerText()
-        );
+        $pagination = $this->paginationFromElements($crawler->filter('#banlist-nav'));
 
         return new LengthAwarePaginator(
             items: collect($bans)
@@ -66,7 +68,7 @@ class DefaultExtractor extends Extractor
                 ->values(),
             total: $pagination['total'],
             perPage: $pagination['end'] - $pagination['start'],
-            currentPage: $this->currentPageFromSelect($crawler->filter('#banlist table + #banlist-nav select')),
+            currentPage: $this->currentPageFromSelect($crawler->filter(' #banlist-nav select')),
         );
     }
 }

@@ -2,7 +2,7 @@
 
 dataset('baseurls', [
     // default
-    'https://firepoweredgaming.com/sourcebanspp/index.php',
+    'https://firepoweredgaming.com/sourcebans/index.php',
     'https://bans.harpoongaming.com/index.php',
     'https://bans.panda-community.com/index.php',
     'https://sourcebans.gamerzhost.de/sb419/index.php',
@@ -17,17 +17,10 @@ dataset('baseurls', [
     'https://hellbreak.pl/sb/index.php',
     'https://sourcebans.ghostcap.com/index.php',
     'https://pong.setti.info/sourcebans/index.php',
+    'https://www.skial.com/sourcebans/index.php',
     // fluent
-    'https://www.cswroclaw.pl/sbcsw/index.php',
-    'https://bans.zzk-community.de/index.php',
-    'https://sourcebans.zkservidores.com/index.php',
-    'https://www.sirplease.gg/index.php',
     'https://sourcebans.onetap.pl/index.php',
-    'https://www.weallplay.eu/sourcebans/index.php',
-    'https://sb.feelthegame.eu/index.php',
     'https://goodteemo.serverscstrike.com/index.php',
-    'https://bans.gaming-biatch.eu/index.php',
-    'https://newlandscsgo.com.br/sourcebans/index.php',
     // blue
     'https://neonheights.xyz/bans/index.php',
 ]);

@@ -1,6 +1,7 @@
 <?php
 
 use Astrotomic\SourceBansSdk\Data\Ban;
+use Astrotomic\SteamSdk\SteamID;
 use Carbon\CarbonImmutable;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\LazyCollection;
@@ -51,7 +52,7 @@ it('can search for steamid', function (): void {
     Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
 
     $bans->each(function (Ban $ban) use ($steamid): void {
-        Assert::assertSame($steamid->ConvertToUInt64(), $ban->steam_id->ConvertToUInt64());
+        Assert::assertSame($steamid->toSteamID(), $ban->steam_id->toSteamID());
         Assert::assertSame(2, $ban->total_bans);
     });
 });
@@ -59,8 +60,8 @@ it('can search for steamid', function (): void {
 it('can search for date', function (): void {
     $date = CarbonImmutable::create(2022, 11, 16);
 
-    $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebanspp/index.php')->queryBans(date: $date);
-
+    $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebans/index.php')->queryBans(date: $date);
+    ray($bans->collect())->purple();
     Assert::assertInstanceOf(LazyCollection::class, $bans);
     Assert::assertSame(3, $bans->count());
     Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);

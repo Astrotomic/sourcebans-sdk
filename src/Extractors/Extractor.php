@@ -26,6 +26,7 @@ abstract class Extractor
             'm-d-y H:i',
             'Y.m.d H:i',
             'd.m.Y H:i',
+            'd.m.Y H:i:s',
             'd.m.y H:i:s',
             'l dS \o\f F Y h:i:s A',
             'd-m-Y \| H:i:s',
@@ -60,27 +61,37 @@ abstract class Extractor
     /**
      * @return array{start: int, end: int, total: int}
      */
-    protected function paginationFromString(string $value): array
+    protected function paginationFromElements(Crawler $elements): array
     {
-        $text = html_entity_decode(
-            str_replace(
-                '&nbsp;',
-                ' ',
-                htmlentities($value, encoding: 'utf-8')
-            )
-        );
+        $data = $elements->each(function (Crawler $el): ?array {
+            try {
+                $value = $el->innerText();
 
-        preg_match('/.+\s+(\d+)\s+-\s+(\d+)\s+.+\s+(\d+)\s+.+/', $text, $matches);
+                $text = html_entity_decode(
+                    str_replace(
+                        '&nbsp;',
+                        ' ',
+                        htmlentities($value, encoding: 'utf-8')
+                    )
+                );
 
-        if (empty($matches)) {
-            throw new InvalidArgumentException("Unable to extract pagination details from [{$value}] string.");
-        }
+                preg_match('/.+\s+(\d+)\s+-\s+(\d+)\s+.+\s+(\d+)\s+.+/', $text, $matches);
 
-        return [
-            'start' => (int) $matches[1],
-            'end' => (int) $matches[2],
-            'total' => (int) $matches[3],
-        ];
+                if (empty($matches)) {
+                    throw new InvalidArgumentException("Unable to extract pagination details from [{$value}] string.");
+                }
+
+                return [
+                    'start' => (int) $matches[1],
+                    'end' => (int) $matches[2],
+                    'total' => (int) $matches[3],
+                ];
+            } catch (InvalidArgumentException) {
+                return null;
+            }
+        });
+
+        return collect($data)->filter()->first();
     }
 
     protected function currentPageFromSelect(Crawler $select): int
