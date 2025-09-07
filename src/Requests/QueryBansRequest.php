@@ -43,7 +43,7 @@ class QueryBansRequest extends Request implements Paginatable
     protected function filter(): array
     {
         return match (true) {
-            filled($this->steamid) => ['advType' => 'steam', 'advSearch' => Str::after($this->steamid->RenderSteam2(), ':')],
+            filled($this->steamid) => ['advType' => 'steam', 'advSearch' => Str::after($this->steamid->toSteam2ID(), ':')],
             filled($this->date) => ['advType' => 'date', 'advSearch' => $this->date->format('d,m,y')],
             default => [],
         };
