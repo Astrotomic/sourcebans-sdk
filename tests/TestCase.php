@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Saloon\Http\Faking\Fixture;
 use Saloon\Http\Faking\MockClient;
-use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\PendingRequest;
 
 abstract class TestCase extends Orchestra
@@ -29,7 +28,13 @@ abstract class TestCase extends Orchestra
                     Arr::query(collect($request->query()->all())->diffKeys(array_flip(['key', 'format']))->sortKeys()->all()),
                 ]));
 
-                return MockResponse::fixture($name);
+                return new class($name) extends Fixture
+                {
+                    public function getFixturePath(): string
+                    {
+                        return sprintf('%s.%s', $this->name, static::$fixtureExtension);
+                    }
+                };
             },
         ]);
     }
