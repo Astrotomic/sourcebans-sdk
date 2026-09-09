@@ -43,28 +43,23 @@ final class QueryBansRequestTest extends TestCase
 
     public function test_can_load_specific_page_of_bans(): void
     {
-        foreach (self::BASE_URLS as $baseUrl) {
-            foreach (range(1, 20) as $page) {
-                $bans = $this->sourcebans($baseUrl)->queryBans(page: $page);
+        foreach (range(1, 20) as $page) {
+            $bans = $this->sourcebans('https://sourcebans.onetap.pl/index.php')->queryBans(page: $page);
 
-                self::assertTrue($bans === null || $bans instanceof LengthAwarePaginator);
-
-                if ($bans instanceof LengthAwarePaginator) {
-                    self::assertGreaterThanOrEqual(0, $bans->perPage());
-                    self::assertGreaterThanOrEqual(0, $bans->count());
-                    self::assertLessThanOrEqual($bans->perPage(), $bans->count());
-                    self::assertGreaterThanOrEqual(0, $bans->total());
-                    self::assertContainsOnlyInstancesOf(Ban::class, $bans->items());
-                }
-            }
+            self::assertInstanceOf(LengthAwarePaginator::class, $bans);
+            self::assertGreaterThanOrEqual(0, $bans->perPage());
+            self::assertGreaterThan(0, $bans->count());
+            self::assertLessThanOrEqual($bans->perPage(), $bans->count());
+            self::assertGreaterThan(0, $bans->total());
+            self::assertContainsOnlyInstancesOf(Ban::class, $bans->items());
         }
     }
 
-    public function test_can_load_all_bans(): void
+    public function test_can_load_bans_across_pages(): void
     {
-        $bans = $this->sourcebans('https://sourcebans.onetap.pl/index.php')->queryBans();
+        $bans = $this->sourcebans('https://sourcebans.onetap.pl/index.php')->queryBans()->take(31);
 
-        self::assertGreaterThan(0, $bans->count());
+        self::assertSame(31, $bans->count());
         self::assertContainsOnlyInstancesOf(Ban::class, $bans);
     }
 
