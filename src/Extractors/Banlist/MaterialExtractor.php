@@ -66,7 +66,7 @@ class MaterialExtractor extends Extractor
                 ->filter()
                 ->values(),
             total: $pagination['total'],
-            perPage: $pagination['end'] - $pagination['start'] + 1,
+            perPage: $pagination['end'] - $pagination['start'],
             currentPage: $this->currentPageFromSelect($crawler->filter('#banlist-nav select')),
         );
     }
