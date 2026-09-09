@@ -9,6 +9,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 use Saloon\Http\Faking\Fixture;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\PendingRequest;
+use Saloon\MockConfig;
 
 abstract class TestCase extends Orchestra
 {
@@ -18,6 +19,7 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
+        MockConfig::throwOnMissingFixtures();
         MockClient::destroyGlobal();
         MockClient::global([
             SourceBansConnector::class => function (PendingRequest $request): Fixture {
