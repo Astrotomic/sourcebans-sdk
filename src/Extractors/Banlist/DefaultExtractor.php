@@ -67,7 +67,7 @@ class DefaultExtractor extends Extractor
                 ->filter()
                 ->values(),
             total: $pagination['total'],
-            perPage: $pagination['end'] - $pagination['start'],
+            perPage: $pagination['end'] - $pagination['start'] + 1,
             currentPage: $this->currentPageFromSelect($crawler->filter(' #banlist-nav select')),
         );
     }
