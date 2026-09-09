@@ -12,5 +12,9 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
+      - name: Use Saloon 4 compatible Steam SDK
+        run: |
+          composer config repositories.steam-sdk vcs https://github.com/Astrotomic/steam-sdk
+          composer require astrotomic/steam-sdk:"dev-support-laravel-13-saloon-4 as 2.3.0" --no-update --no-interaction
       - run: composer install --no-interaction --no-scripts
       - run: vendor/bin/pint --test
