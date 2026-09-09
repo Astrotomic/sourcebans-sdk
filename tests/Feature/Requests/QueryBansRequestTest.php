@@ -35,7 +35,7 @@ final class QueryBansRequestTest extends TestCase
         foreach (self::BASE_URLS as $baseUrl) {
             $bans = $this->sourcebans($baseUrl)->queryBans(page: 1);
 
-            self::assertGreaterThan(0, $bans->count());
+            self::assertGreaterThan(0, $bans->count(), $baseUrl);
             self::assertLessThanOrEqual($bans->perPage(), $bans->count());
             self::assertContainsOnlyInstancesOf(Ban::class, $bans);
         }
