@@ -46,7 +46,17 @@ class DefaultExtractor extends Extractor
             return rescue(
                 callback: fn () => new Ban(
                     steam_id: collect(['steam_id', 'steam2', 'steam_community'])
-                        ->map(fn (string $key) => rescue(fn () => new SteamID($data[$key]), report: false))
+                        ->map(function (string $key) use ($data): ?SteamID {
+                            $value = $data[$key];
+
+                            if (blank($value)) {
+                                return null;
+                            }
+
+                            preg_match('/(?:STEAM_\d+:\d+:\d+|\[U:\d+:\d+\]|\d{17})/', $value, $matches);
+
+                            return rescue(fn () => new SteamID($matches[0] ?? $value), report: false);
+                        })
                         ->filter()
                         ->first(),
                     invoked_on: $this->toCarbonImmutable($data->invoked_on),
