@@ -1,0 +1,37 @@
+name: phpunit
+
+on:
+  push:
+
+jobs:
+  phpunit:
+    name: P${{ matrix.php }} - ${{ matrix.dependency-version }}
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: 8.2
+            dependency-version: prefer-lowest
+          - php: 8.2
+            dependency-version: prefer-stable
+          - php: 8.3
+            dependency-version: prefer-stable
+          - php: 8.4
+            dependency-version: prefer-stable
+          - php: 8.5
+            dependency-version: prefer-stable
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+      - name: Use Saloon 4 compatible Steam SDK
+        run: |
+          composer config repositories.steam-sdk vcs https://github.com/Astrotomic/steam-sdk
+          composer require astrotomic/steam-sdk:"dev-support-laravel-13-saloon-4 as 2.3.0" --no-update --no-interaction
+      - name: Install dependencies
+        run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
+      - run: vendor/bin/phpunit

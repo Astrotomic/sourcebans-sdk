@@ -1,71 +1,96 @@
 <?php
 
+namespace Tests\Feature\Requests;
+
 use Astrotomic\SourceBansSdk\Data\Ban;
 use Astrotomic\SteamSdk\SteamID;
 use Carbon\CarbonImmutable;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\LazyCollection;
-use PHPUnit\Framework\Assert;
+use Tests\TestCase;
 
-it('can load first page of bans', function (string $baseUrl): void {
-    $bans = $this->sourcebans($baseUrl)->queryBans(page: 1);
+final class QueryBansRequestTest extends TestCase
+{
+    private const BASE_URLS = [
+        // default
+        'https://firepoweredgaming.com/sourcebans/index.php',
+        'https://bans.harpoongaming.com/index.php',
+        'https://bans.panda-community.com/index.php',
+        'https://bans.floserver.de/index.php',
+        'https://csgoskin.ir/server/index.php',
+        'https://tf2-casual-fun.de/sourcebans/index.php',
+        'https://vimo.lt/bans/index.php',
+        'https://bans.blackwonder.tf/index.php',
+        'https://hellbreak.pl/sb/index.php',
+        'https://www.skial.com/sourcebans/index.php',
+        // fluent
+        'https://sourcebans.onetap.pl/index.php',
+        'https://goodteemo.serverscstrike.com/index.php',
+        // blue
+        'https://neonheights.xyz/bans/index.php',
+    ];
 
-    Assert::assertGreaterThan(0, $bans->count());
-    Assert::assertLessThanOrEqual($bans->perPage(), $bans->count());
-    Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
-})->with('baseurls');
+    public function test_can_load_first_page_of_bans(): void
+    {
+        foreach (self::BASE_URLS as $baseUrl) {
+            $bans = $this->sourcebans($baseUrl)->queryBans(page: 1);
 
-it('can load specific page of bans', function (string $baseUrl, int $page): void {
-    $bans = $this->sourcebans($baseUrl)->queryBans(page: $page);
-
-    Assert::assertTrue($bans === null || $bans instanceof LengthAwarePaginator);
-
-    if ($bans instanceof LengthAwarePaginator) {
-        Assert::assertGreaterThanOrEqual(0, $bans->perPage());
-
-        Assert::assertGreaterThanOrEqual(0, $bans->count());
-        Assert::assertLessThanOrEqual($bans->perPage(), $bans->count());
-
-        Assert::assertGreaterThanOrEqual(0, $bans->total());
-
-        Assert::assertContainsOnlyInstancesOf(Ban::class, $bans->items());
+            self::assertGreaterThan(0, $bans->count(), $baseUrl);
+            self::assertLessThanOrEqual($bans->perPage(), $bans->count());
+            self::assertContainsOnlyInstancesOf(Ban::class, $bans);
+        }
     }
-})->with('baseurls')->with(range(1, 20));
 
-it('can load all bans', function (string $baseUrl): void {
-    $bans = $this->sourcebans($baseUrl)->queryBans();
+    public function test_can_load_specific_page_of_bans(): void
+    {
+        foreach (range(1, 20) as $page) {
+            $bans = $this->sourcebans('https://sourcebans.onetap.pl/index.php')->queryBans(page: $page);
 
-    Assert::assertGreaterThan(0, $bans->count());
-    Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
-})->with([
-    'https://sourcebans.onetap.pl/index.php', // fluent
-]);
+            self::assertInstanceOf(LengthAwarePaginator::class, $bans);
+            self::assertGreaterThanOrEqual(0, $bans->perPage());
+            self::assertGreaterThan(0, $bans->count());
+            self::assertLessThanOrEqual($bans->perPage(), $bans->count());
+            self::assertGreaterThan(0, $bans->total());
+            self::assertContainsOnlyInstancesOf(Ban::class, $bans->items());
+        }
+    }
 
-it('can search for steamid', function (): void {
-    $steamid = new SteamID('76561198928142028');
+    public function test_can_load_bans_across_pages(): void
+    {
+        $bans = $this->sourcebans('https://sourcebans.onetap.pl/index.php')->queryBans()->take(31);
 
-    $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebanspp/index.php')->queryBans(steamid: $steamid);
+        self::assertSame(31, $bans->count());
+        self::assertContainsOnlyInstancesOf(Ban::class, $bans);
+    }
 
-    Assert::assertInstanceOf(LazyCollection::class, $bans);
-    Assert::assertSame(2, $bans->count());
-    Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
+    public function test_can_search_for_steamid(): void
+    {
+        $steamid = new SteamID('76561198928142028');
 
-    $bans->each(function (Ban $ban) use ($steamid): void {
-        Assert::assertSame($steamid->toSteamID(), $ban->steam_id->toSteamID());
-        Assert::assertSame(2, $ban->total_bans);
-    });
-});
+        $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebanspp/index.php')->queryBans(steamid: $steamid);
 
-it('can search for date', function (): void {
-    $date = CarbonImmutable::create(2022, 11, 16);
+        self::assertInstanceOf(LazyCollection::class, $bans);
+        self::assertSame(2, $bans->count());
+        self::assertContainsOnlyInstancesOf(Ban::class, $bans);
 
-    $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebans/index.php')->queryBans(date: $date);
+        $bans->each(function (Ban $ban) use ($steamid): void {
+            self::assertSame($steamid->toSteamID(), $ban->steam_id->toSteamID());
+            self::assertSame(2, $ban->total_bans);
+        });
+    }
 
-    Assert::assertInstanceOf(LazyCollection::class, $bans);
-    Assert::assertSame(3, $bans->count());
-    Assert::assertContainsOnlyInstancesOf(Ban::class, $bans);
+    public function test_can_search_for_date(): void
+    {
+        $date = CarbonImmutable::create(2022, 11, 16);
 
-    $bans->each(function (Ban $ban) use ($date): void {
-        Assert::assertTrue($date->isSameDay($ban->invoked_on));
-    });
-});
+        $bans = $this->sourcebans('https://firepoweredgaming.com/sourcebans/index.php')->queryBans(date: $date);
+
+        self::assertInstanceOf(LazyCollection::class, $bans);
+        self::assertSame(3, $bans->count());
+        self::assertContainsOnlyInstancesOf(Ban::class, $bans);
+
+        $bans->each(function (Ban $ban) use ($date): void {
+            self::assertTrue($date->isSameDay($ban->invoked_on));
+        });
+    }
+}

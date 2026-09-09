@@ -21,24 +21,22 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-json": "*",
-        "astrotomic/steam-sdk": "^2.0.0",
-        "illuminate/support": "^9.0 || ^10.0 || ^11.0 || ^12.0",
-        "nesbot/carbon": "^2.53.1",
-        "saloonphp/laravel-plugin": "^3.0",
-        "saloonphp/pagination-plugin": "^2.0",
-        "saloonphp/saloon": "^3.0",
-        "spatie/laravel-data": "^4.0",
+        "astrotomic/steam-sdk": "^2.3.0",
+        "illuminate/support": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "nesbot/carbon": "^2.53.1 || ^3.8.4",
+        "saloonphp/pagination-plugin": "^2.3.0",
+        "saloonphp/saloon": "^4.0",
+        "spatie/laravel-data": "^3.0 || ^4.0",
         "symfony/css-selector": "^5.4 || ^6.0 || ^7.0",
         "symfony/dom-crawler": "^6.1 || ^7.0"
     },
     "require-dev": {
-        "astrotomic/phpunit-assertions": "^0.12.0",
+        "astrotomic/phpunit-assertions": "^0.13.0",
         "laravel/pint": "^1.2",
-        "orchestra/testbench": "^7.0 || ^8.0 || ^9.0 || ^10.0",
-        "pestphp/pest": "^1.21",
-        "pestphp/pest-plugin-laravel": "^1.2",
+        "orchestra/testbench": "^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
+        "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5 || ^12.5",
         "spatie/laravel-ray": "^1.40"
     },
     "autoload": {
@@ -52,9 +50,6 @@
         }
     },
     "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        },
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true
@@ -80,8 +75,8 @@
         "fix": "@php vendor/bin/pint",
         "normalize": "echo 'composer global require ergebnis/composer-normalize'",
         "phpstan": "@php vendor/bin/phpstan analyse --memory-limit=2G",
-        "test": "@php -d memory_limit=-1 vendor/bin/pest",
-        "test-coverage": "XDEBUG_MODE=coverage php -d memory_limit=-1 vendor/bin/pest --coverage-html=.coverage",
+        "test": "@php -d memory_limit=-1 vendor/bin/phpunit",
+        "test-coverage": "XDEBUG_MODE=coverage php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=.coverage",
         "thanks": "echo 'composer global require symfony/thanks'"
     }
 }

@@ -7,9 +7,9 @@ use Astrotomic\SourceBansSdk\SourceBansSdkServiceProvider;
 use Illuminate\Support\Arr;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Saloon\Http\Faking\Fixture;
-use Saloon\Http\Faking\MockResponse;
+use Saloon\Http\Faking\MockClient;
 use Saloon\Http\PendingRequest;
-use Saloon\Laravel\Facades\Saloon;
+use Saloon\MockConfig;
 
 abstract class TestCase extends Orchestra
 {
@@ -19,7 +19,9 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
-        Saloon::fake([
+        MockConfig::throwOnMissingFixtures();
+        MockClient::destroyGlobal();
+        MockClient::global([
             SourceBansConnector::class => function (PendingRequest $request): Fixture {
                 $name = implode('/', array_filter([
                     parse_url($request->getUrl(), PHP_URL_HOST),
@@ -28,7 +30,12 @@ abstract class TestCase extends Orchestra
                     Arr::query(collect($request->query()->all())->diffKeys(array_flip(['key', 'format']))->sortKeys()->all()),
                 ]));
 
-                return MockResponse::fixture($name);
+                return new class($name) extends Fixture {
+                    public function getFixturePath(): string
+                    {
+                        return sprintf('%s.%s', $this->name, self::$fixtureExtension);
+                    }
+                };
             },
         ]);
     }

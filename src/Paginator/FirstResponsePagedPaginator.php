@@ -69,6 +69,6 @@ class FirstResponsePagedPaginator extends PagedPaginator
 
     protected function isLastPage(Response $response): bool
     {
-        return $this->getCurrentPage() > $this->totalPages();
+        return $this->getCurrentPage() >= $this->totalPages();
     }
 }
