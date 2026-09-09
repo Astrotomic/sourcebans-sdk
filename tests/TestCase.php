@@ -30,11 +30,10 @@ abstract class TestCase extends Orchestra
                     Arr::query(collect($request->query()->all())->diffKeys(array_flip(['key', 'format']))->sortKeys()->all()),
                 ]));
 
-                return new class($name) extends Fixture
-                {
+                return new class($name) extends Fixture {
                     public function getFixturePath(): string
                     {
-                        return sprintf('%s.%s', $this->name, static::$fixtureExtension);
+                        return sprintf('%s.%s', $this->name, self::$fixtureExtension);
                     }
                 };
             },
